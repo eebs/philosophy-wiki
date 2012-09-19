@@ -60,7 +60,9 @@ def ensure_has_atag(ptag)
 end
 
 def get_first_atag(doc)
-    doc.at_css('sup').remove if doc.at_css('sup')
+    while doc.at_css('sup') do
+        doc.at_css('sup').remove
+    end
     doc.at_css('a').attr('href')
 end
 
