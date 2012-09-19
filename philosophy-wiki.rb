@@ -1,23 +1,9 @@
 require 'rubygems'
 require 'nokogiri'
 require 'open-uri'
-require 'redis'
-require 'digest/sha1'
-require 'json'
-require 'pp'
 
 def sha1(data)
     Digest::SHA1.hexdigest data
-end
-
-
-def remove_parens(data)
-    x = data.dup
-    while
-        #x.gsub!(/\([^()]*\)/,"")
-        x.gsub!(/(?<!["])\([^()]*\)(?!["])/, "")
-    end
-    x
 end
 
 def strip_parens(data)
@@ -49,7 +35,6 @@ end
 
 def get_random_url()
     randomUrl = "http://en.wikipedia.org/wiki/Special:Random"
-    #randomUrl = "http://en.wikipedia.org/wiki/Racquet"
 
     randomPage = nil
     open(randomUrl) do |resp|
@@ -94,10 +79,6 @@ def get_new_url(doc)
     newurl = $base_url + first_link
 end
 
-def exit
-    Process.exit!
-end
-
 def process_url(url)
     doc = Nokogiri::HTML(open(url))
     title = doc.title
@@ -126,23 +107,4 @@ end
 
 $base_url = 'http://en.wikipedia.org'
 run
-
-#redis = Redis.new
-
-#page = Hash.new
-#page['id'] = sha1(randomPage)
-#page['url'] = randomPage
-#page['title'] = doc.title
-#page['path'] ||= Array.new
-#page['to'] = nil
-
-
-
-#redis.set(page['id'], page.to_json)
-#value = redis.get(page['id'])
-
-#pp value
-
-#pp page
-
 
