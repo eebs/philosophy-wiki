@@ -1,6 +1,8 @@
 require 'rubygems'
 require 'nokogiri'
 require 'open-uri'
+require 'redis'
+require 'digest/sha1'
 
 def sha1(data)
     Digest::SHA1.hexdigest data
@@ -43,6 +45,9 @@ def get_random_url()
 end
 
 def has_an_a_tag(data)
+    if not data then
+        raise 'Uh oh, something bad happened.'
+    end
     data.at_css('a')
 end
 
@@ -82,22 +87,48 @@ def get_new_url(doc)
 end
 
 def process_url(url)
+    id = sha1(url)
+
+    # Are we in a loop?
+    if $visited[id] then
+        puts "Oh noes, loopy!"
+        return false
+    end
+    # Not in loop, add current to hash
+    $visited[id] = true
+
     doc = Nokogiri::HTML(open(url))
     title = doc.title
+    if not title then
+        puts doc.to_s
+        Process.exit!
+        puts 'wtf no title!'
+    end
+
+    if memio = $redis.get(id) then
+        puts 'Stopping at ' + memio
+        $redis.set(id, title)
+        return true
+    end
 
     puts title
     puts url
 
     if(title == 'Philosophy - Wikipedia, the free encyclopedia')
+        $redis.set(id, title)
         puts 'Done!'
-        return false
+        return true
     end
 
     newurl = get_new_url(doc)
-    process_url(newurl)
+    if process_url(newurl) then
+        $redis.set(id, title)
+        return true
+    end
 end
 
 def run(infinite = false)
+    $visited = Hash.new
     url = get_random_url
     process_url(url)
 
@@ -108,5 +139,11 @@ def run(infinite = false)
 end
 
 $base_url = 'http://en.wikipedia.org'
-run
+$redis = Redis.new
+
+begin
+    run
+rescue Exception => e
+    puts e
+end
 
