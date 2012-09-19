@@ -45,9 +45,6 @@ def get_random_url()
 end
 
 def has_an_a_tag(data)
-    if not data then
-        raise 'Uh oh, something bad happened.'
-    end
     data.at_css('a')
 end
 
@@ -99,11 +96,6 @@ def process_url(url)
 
     doc = Nokogiri::HTML(open(url))
     title = doc.title
-    if not title then
-        puts doc.to_s
-        Process.exit!
-        puts 'wtf no title!'
-    end
 
     if memio = $redis.get(id) then
         puts 'Stopping at ' + memio
@@ -144,6 +136,6 @@ $redis = Redis.new
 begin
     run
 rescue Exception => e
-    puts e
+    puts 'Uh oh, something bad happened.'
 end
 
