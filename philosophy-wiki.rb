@@ -1,8 +1,17 @@
 require 'rubygems'
-require 'nokogiri'
+begin
+    require 'nokogiri'
+rescue LoadError
+    abort "Could not load nokogiri gem. Please see installation instructions: http://nokogiri.org/tutorials/installing_nokogiri.html"
+end
 require 'open-uri'
-require 'redis'
+begin
+    require 'redis'
+rescue LoadError
+    abort "Could not load redis gem. Please run sudo gem install redis"
+end
 require 'digest/sha1'
+
 
 def sha1(data)
     Digest::SHA1.hexdigest data
